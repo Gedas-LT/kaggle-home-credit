@@ -6,3 +6,4 @@ data/credit_card_balance.csv
 data/installments_payments.csv
 data/pos_cash_balance.csv
 data/previous_application.csv
+__pycache__/functions.cpython-39.pyc
