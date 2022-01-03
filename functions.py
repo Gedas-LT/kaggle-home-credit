@@ -1,6 +1,7 @@
 import math
 import random
 
+import numpy as np
 import pandas as pd
 
 def distinct_values(dataframe: pd.DataFrame, col_name: str, coef: float) -> pd.DataFrame:
@@ -36,3 +37,16 @@ def missing_values(dataframe: pd.DataFrame) -> pd.DataFrame:
     nan_values = nan_values[nan_values["NaN values"] > 0].sort_values(by=["NaN values, %"], ascending=False)
     
     return nan_values
+
+
+def export_predictions(id: pd.Series, predictions: np.ndarray, name_prefix: str):
+    """Exports final predictions for submission as a .csv file.
+    
+    Keyword arguments:
+    id -- column as a pandas series with the IDs.
+    predictions -- predictions as an array.
+    name_prefix -- name prefix in final URL. For example "submissions/{name_prefix}_predictions.
+    """
+    
+    output = pd.DataFrame({"SK_ID_CURR": id, "TARGET": predictions[:, 1]})
+    output.to_csv(f"submissions/{name_prefix}_predictions.csv", index=False)
