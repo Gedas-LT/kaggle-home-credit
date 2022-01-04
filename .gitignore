@@ -7,3 +7,10 @@ data/installments_payments.csv
 data/pos_cash_balance.csv
 data/previous_application.csv
 __pycache__/functions.cpython-39.pyc
+submissions/averaged_predictions.csv
+submissions/base_predictions.csv
+submissions/log_predictions.csv
+submissions/xgboost_predictions.csv
+submissions/sgd_predictions.csv
+submissions/nb_predictions.csv
+submissions/forest_predictions.csv
