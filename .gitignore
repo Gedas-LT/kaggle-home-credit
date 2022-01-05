@@ -14,3 +14,4 @@ submissions/xgboost_predictions.csv
 submissions/sgd_predictions.csv
 submissions/nb_predictions.csv
 submissions/forest_predictions.csv
+submissions/ada_predictions.csv
