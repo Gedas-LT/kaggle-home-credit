@@ -15,3 +15,5 @@ submissions/sgd_predictions.csv
 submissions/nb_predictions.csv
 submissions/forest_predictions.csv
 submissions/ada_predictions.csv
+submissions/base_predictions.csv
+submissions/log_predictions.csv
