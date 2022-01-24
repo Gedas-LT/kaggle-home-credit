@@ -50,3 +50,18 @@ def export_predictions(id: pd.Series, predictions: np.ndarray, name_prefix: str)
     
     output = pd.DataFrame({"SK_ID_CURR": id, "TARGET": predictions[:, 1]})
     output.to_csv(f"submissions/{name_prefix}_predictions.csv", index=False)
+    
+    
+def imbalanced_features(table: pd.DataFrame) -> pd.DataFrame:
+    """Takes in a table and returns another table with column names 
+    and information about most frequent values in those columns.
+    """
+    
+    feature_names = [column for column in table]
+    qty_most_freq_val = [table[column].value_counts().iloc[0] for column in table]
+    qty_most_freq_val_perc = [table[column].value_counts().iloc[0] / len(table) * 100 for column in table]
+    
+    most_freq_val_table = pd.DataFrame({"Feature Name": feature_names, "QTY of most freq. value": qty_most_freq_val,
+                                        "% of Total Values": qty_most_freq_val_perc}).sort_values(by="% of Total Values", ascending=False)
+    
+    return most_freq_val_table
