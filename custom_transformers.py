@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 
-def organization_type(input_df: pd.DataFrame) -> pd.DataFrame:
+def blend_organization_type(input_df: pd.DataFrame) -> pd.DataFrame:
     """Takes in pandas dataframe and returns pandas dataframe with 
-    customized values of ORGANIZATION_TYPE feature.
+    blended values of ORGANIZATION_TYPE feature.
     """
     
     condlist = [input_df["ORGANIZATION_TYPE"].str.startswith("Business") == True,
@@ -14,5 +14,23 @@ def organization_type(input_df: pd.DataFrame) -> pd.DataFrame:
     choicelist = ["Business", "Trade", "Transport", "Industry"]
 
     input_df["ORGANIZATION_TYPE"] = np.select(condlist, choicelist, input_df["ORGANIZATION_TYPE"])
+    
+    return input_df
+
+
+def credit_card_dpd(input_df: pd.DataFrame, credit_card_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and additional dataframe with credit cards information
+    and returns input dataframe with additional column with DPD flag values.
+    
+    Keyword arguments:
+    input_df -- primary dataframe from sklearn pipeline.
+    credit_card_df -- additional dataframe with information about credit cards. 
+    """
+    
+    credit_card_dpd = credit_card_df[(credit_card_df["MONTHS_BALANCE"] > -12) & (credit_card_df["NAME_CONTRACT_STATUS"] == "Active")][["SK_ID_CURR", "SK_DPD"]]
+    credit_card_dpd["FLAG_DPD"] = [1 if x > 0 else 0 for x in credit_card_dpd["SK_DPD"]]
+    count_credit_card_dpd = credit_card_dpd.groupby("SK_ID_CURR")["FLAG_DPD"].sum().reset_index()
+
+    input_df = pd.merge(input_df, count_credit_card_dpd, on="SK_ID_CURR", how="left").fillna(0)
     
     return input_df
