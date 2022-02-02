@@ -34,3 +34,27 @@ def credit_card_dpd(input_df: pd.DataFrame, credit_card_df: pd.DataFrame) -> pd.
     input_df = pd.merge(input_df, count_credit_card_dpd, on="SK_ID_CURR", how="left").fillna(0)
     
     return input_df
+
+
+def pos_cash_dpd(input_df: pd.DataFrame, pos_cash_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and additional dataframe with information of 
+    POS (point of sales) and cash loans and returns input dataframe with additional column with sum of DPD.
+    
+    Keyword arguments:
+    input_df -- primary dataframe from sklearn pipeline.
+    pos_cash_df -- additional dataframe with information about POS (point of sales) and cash loans. 
+    """
+    
+    pos_cash_dpd = pos_cash_df[(pos_cash_df["MONTHS_BALANCE"] > -12) & (pos_cash_df["NAME_CONTRACT_STATUS"] == "Active")].groupby("SK_ID_CURR")["SK_DPD"].sum().reset_index()
+
+    input_df = pd.merge(input_df, pos_cash_dpd, on="SK_ID_CURR", how="left").fillna(0)
+    
+    return input_df
+
+
+def flag_insurance(input_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and returns input dataframe with FLAG_INSURANCE column."""
+    
+    input_df["FLAG_INSURANCE"] = np.where(input_df["AMT_CREDIT"] - input_df["AMT_GOODS_PRICE"] > 0, 1, 0)
+    
+    return input_df
