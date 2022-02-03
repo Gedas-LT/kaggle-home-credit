@@ -58,3 +58,32 @@ def flag_insurance(input_df: pd.DataFrame) -> pd.DataFrame:
     input_df["FLAG_INSURANCE"] = np.where(input_df["AMT_CREDIT"] - input_df["AMT_GOODS_PRICE"] > 0, 1, 0)
     
     return input_df
+
+
+def credit_card_drawings(input_df: pd.DataFrame, credit_card_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and additional dataframe with credit cards information and 
+    returns input dataframe with additional column with total amount of drawings for the last half of year.
+    
+    Keyword arguments:
+    input_df -- primary dataframe from sklearn pipeline.
+    credit_card_df -- additional dataframe with information about credit cards. 
+    """
+    
+    credit_card_drawings = credit_card_df[["SK_ID_CURR", "AMT_DRAWINGS_ATM_CURRENT", "AMT_DRAWINGS_CURRENT", "AMT_DRAWINGS_OTHER_CURRENT", "AMT_DRAWINGS_POS_CURRENT", "MONTHS_BALANCE"]].fillna(0)
+    credit_card_drawings["ALL_DRAWINGS"] = credit_card_drawings[credit_card_drawings["MONTHS_BALANCE"] > -7].iloc[:,-4:].sum(axis=1)
+    credit_card_drawings = credit_card_drawings.groupby("SK_ID_CURR")["ALL_DRAWINGS"].sum().reset_index()
+    input_df = pd.merge(input_df, credit_card_drawings, on="SK_ID_CURR", how="left").fillna(0)
+    
+    return input_df
+
+
+def flag_insurance(input_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and returns input dataframe with FLAG_INSURANCE column."""
+    
+    bins = [0, 1, 365, 915, 2555, 5110, 9125, input_df["DAYS_EMPLOYED"].max()]
+    labels = ["YEAR_0", "YEAR_1", "YEAR_2.5", "YEAR_7", "YEAR_14", "YEAR_25", "YEAR_25_MORE"]
+    
+    input_df["DAYS_EMPLOYED_BINS"] = pd.cut(input_df["DAYS_EMPLOYED"] , bins=bins, labels=labels, include_lowest=True).astype(object)
+    input_df["DAYS_EMPLOYED_BINS"] = pd.cut(input_df["DAYS_EMPLOYED"] , bins=bins, labels=labels, include_lowest=True).astype(object)
+    
+    return input_df
