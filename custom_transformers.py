@@ -87,3 +87,19 @@ def flag_insurance(input_df: pd.DataFrame) -> pd.DataFrame:
     input_df["DAYS_EMPLOYED_BINS"] = pd.cut(input_df["DAYS_EMPLOYED"] , bins=bins, labels=labels, include_lowest=True).astype(object)
     
     return input_df
+
+
+def pandas_binning(input_df: pd.DataFrame, feature: str, bins: list, labels: list) -> pd.DataFrame:
+    """Takes in pandas dataframe within scikit-learn pipeline and 
+    returns input dataframe with binned values of specified feature.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    feature -- name of the binning feature.
+    bins -- list of bins used in pandas cut function.
+    labels -- list of labels used in pandas cut function. 
+    """
+    
+    input_df[feature] = pd.cut(input_df[feature] , bins=bins, labels=labels, include_lowest=True).astype(object)
+    
+    return input_df
