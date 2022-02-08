@@ -113,3 +113,50 @@ def pandas_binning(input_df: pd.DataFrame, feature: str, bins: list, labels: lis
     result[feature] = pd.cut(result[feature] , bins=bins, labels=labels, include_lowest=True).astype(object)
     
     return result
+
+
+def bureau_credit_type_counter(input_df: pd.DataFrame, bureau_df:pd.DataFrame, scarce_values: list) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and additional dataframe with data provided by other financial institutions 
+    and returns input dataframe with additional column with count of different credit type for each client.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    bureau_df -- additional dataframe with data provided by other financial institutions.
+    scarce_values -- list of values which should be named under one name. 
+    """
+    
+    result = input_df.copy()
+    
+    bureau_credit_type = bureau_df[["SK_ID_CURR", "CREDIT_TYPE"]]
+    bureau_credit_type["CREDIT_TYPE"] = np.where(bureau_credit_type["CREDIT_TYPE"]
+                                                 .isin(scarce_values), "Other", bureau_credit_type["CREDIT_TYPE"])
+    bureau_credit_type = (pd.get_dummies(bureau_credit_type[["SK_ID_CURR", "CREDIT_TYPE"]], prefix="BUREAU_CREDIT")
+                          .groupby("SK_ID_CURR")
+                          .sum()
+                          .reset_index())
+    
+    result = pd.merge(result, bureau_credit_type, on="SK_ID_CURR", how="left").fillna(0)
+    
+    return result
+
+
+def prev_credit_type_counter(input_df: pd.DataFrame, previous_application_df:pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and additional dataframe with data about previous applications 
+    and returns input dataframe with additional column with count of different credit type for each client.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    bureau_df -- additional dataframe with data about previous applications in Home Credit. 
+    """
+    
+    result = input_df.copy()
+    
+    prev_app_type = previous_application_df[["SK_ID_CURR", "NAME_CONTRACT_TYPE"]]
+    prev_app_type = (pd.get_dummies(prev_app_type[["SK_ID_CURR", "NAME_CONTRACT_TYPE"]], prefix="PREV_APP")
+                     .groupby("SK_ID_CURR")
+                     .sum()
+                     .reset_index())
+    
+    result = pd.merge(result, prev_app_type, on="SK_ID_CURR", how="left").fillna(0)
+    
+    return result
