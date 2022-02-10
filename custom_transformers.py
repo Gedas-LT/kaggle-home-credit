@@ -146,7 +146,7 @@ def prev_credit_type_counter(input_df: pd.DataFrame, previous_application_df:pd.
     
     Keyword arguments:
     input_df -- primary dataframe within sklearn pipeline.
-    bureau_df -- additional dataframe with data about previous applications in Home Credit. 
+    previous_application_df -- additional dataframe with data about previous applications in Home Credit. 
     """
     
     result = input_df.copy()
@@ -158,5 +158,35 @@ def prev_credit_type_counter(input_df: pd.DataFrame, previous_application_df:pd.
                      .reset_index())
     
     result = pd.merge(result, prev_app_type, on="SK_ID_CURR", how="left").fillna(0)
+    
+    return result
+
+
+def prev_flag_insurance(input_df: pd.DataFrame, previous_application_df:pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and additional dataframe with data about previous applications 
+    and returns input dataframe with additional column with insurance flag for previous application.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    previous_application_df -- additional dataframe with data about previous applications in Home Credit. 
+    """
+    
+    result = input_df.copy()
+    
+    flag_previous_insurance = previous_application_df.groupby("SK_ID_CURR")["NFLAG_INSURED_ON_APPROVAL"].max().reset_index()
+    
+    result = pd.merge(result, flag_previous_insurance, on="SK_ID_CURR", how="left").fillna(0)
+    
+    return result
+
+
+def annuity_income_ratio(input_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and returns input dataframe
+    with additional column ANNUITY_VERSUS_INCOME.
+    """
+    
+    result = input_df.copy()
+    
+    result["ANNUITY_VERSUS_INCOME"] = result["AMT_ANNUITY"] / result["AMT_INCOME_TOTAL"] * 100
     
     return result
