@@ -21,7 +21,7 @@ def blend_organization_type(input_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def credit_card_dpd(input_df: pd.DataFrame, credit_card_df: pd.DataFrame) -> pd.DataFrame:
-    """Takes in pandas dataframe from pipeline and additional dataframe with credit cards information
+    """Takes in pandas dataframe from pipeline, additional dataframe with credit cards information
     and returns input dataframe with additional column with DPD flag values.
     
     Keyword arguments:
@@ -115,7 +115,7 @@ def pandas_binning(input_df: pd.DataFrame, feature: str, bins: list, labels: lis
     return result
 
 
-def bureau_credit_type_counter(input_df: pd.DataFrame, bureau_df:pd.DataFrame, scarce_values: list) -> pd.DataFrame:
+def bureau_credit_type_counter(input_df: pd.DataFrame, bureau_df: pd.DataFrame, scarce_values: list) -> pd.DataFrame:
     """Takes in pandas dataframe from pipeline and additional dataframe with data provided by other financial institutions 
     and returns input dataframe with additional column with count of different credit type for each client.
     
@@ -140,7 +140,7 @@ def bureau_credit_type_counter(input_df: pd.DataFrame, bureau_df:pd.DataFrame, s
     return result
 
 
-def prev_credit_type_counter(input_df: pd.DataFrame, previous_application_df:pd.DataFrame) -> pd.DataFrame:
+def prev_credit_type_counter(input_df: pd.DataFrame, previous_application_df: pd.DataFrame) -> pd.DataFrame:
     """Takes in pandas dataframe from pipeline and additional dataframe with data about previous applications 
     and returns input dataframe with additional column with count of different credit type for each client.
     
@@ -162,7 +162,7 @@ def prev_credit_type_counter(input_df: pd.DataFrame, previous_application_df:pd.
     return result
 
 
-def prev_flag_insurance(input_df: pd.DataFrame, previous_application_df:pd.DataFrame) -> pd.DataFrame:
+def prev_flag_insurance(input_df: pd.DataFrame, previous_application_df: pd.DataFrame) -> pd.DataFrame:
     """Takes in pandas dataframe from pipeline and additional dataframe with data about previous applications 
     and returns input dataframe with additional column with insurance flag for previous application.
     
@@ -187,6 +187,146 @@ def annuity_income_ratio(input_df: pd.DataFrame) -> pd.DataFrame:
     
     result = input_df.copy()
     
-    result["ANNUITY_VERSUS_INCOME"] = result["AMT_ANNUITY"] / result["AMT_INCOME_TOTAL"] * 100
+    result["ANNUITY_VS_INCOME"] = result["AMT_ANNUITY"] / result["AMT_INCOME_TOTAL"] * 100
+    
+    return result
+
+
+def prev_annuity_income_ratio(input_df: pd.DataFrame, previous_application_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and additional dataframe with data about previous applications 
+    and returns input dataframe with additional column PREV_ANNUITY_VERSUS_INCOME.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    previous_application_df -- additional dataframe with data about previous applications in Home Credit. 
+    """
+    
+    result = input_df.copy()
+    
+    avg_previous_annuity = (previous_application_df
+                            .groupby("SK_ID_CURR")["AMT_ANNUITY"]
+                            .mean()
+                            .reset_index()
+                            .rename(columns={"AMT_ANNUITY": "PREV_ANNUITY"}))
+
+    result = pd.merge(result, avg_previous_annuity, on="SK_ID_CURR", how="left").fillna(0)
+
+    result["PREV_ANNUITY_VS_INCOME"] = result["PREV_ANNUITY"] / result["AMT_INCOME_TOTAL"] * 100
+    
+    return result
+
+
+def enquiries(input_df: pd.DataFrame, enquiries_list: list) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and list of columns' name and returns 
+    input dataframe with additional column PREV_ANNUITY_VERSUS_INCOME - number of all 
+    enquiries to Credit Bureau about the client before application.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    enquiries_list -- list of columns' name about enquirties. 
+    """
+    
+    result = input_df.copy()
+    
+    result["AMT_REQ_CREDIT_BUREAU"] = 0
+    
+    for enquire in enquiries_list:
+        result["AMT_REQ_CREDIT_BUREAU"] += result[enquire]
+    
+    return result
+
+
+def prev_dpd_flag(input_df: pd.DataFrame, bureau_balance_df: pd.DataFrame, bureau_df: pd.DataFrame, dpd_notation: list) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline, two additional dataframes with information about previous credits 
+    provided by other financial institutions and list of DPD notations and returns input dataframe with additional column DPD_STATUS.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    bureau_df - additional dataframe with information about previous credits provided by other financial institutions.
+    bureau_balance_df - additional dataframe with information about monthly balances of previous credits.
+    enquiries_list -- list of columns' name about enquirties. 
+    """
+    
+    result = input_df.copy()
+    
+    bureau_balance_df["DPD_STATUS"] = np.where(bureau_balance_df["STATUS"].isin(dpd_notation), 1, 0)
+    bureau_dpd_status = bureau_balance_df.groupby("SK_ID_BUREAU")["DPD_STATUS"].sum().reset_index()
+    
+    bureau_balance_dpd = pd.merge(bureau_df, bureau_dpd_status, on="SK_ID_BUREAU", how="left").fillna(0)
+    bureau_balance_dpd = bureau_balance_dpd.groupby("SK_ID_CURR")["DPD_STATUS"].sum().reset_index()
+    
+    result = pd.merge(result, bureau_balance_dpd, on="SK_ID_CURR", how="left").fillna(0)
+    
+    return result
+
+
+def down_payment_rate(input_df: pd.DataFrame, previous_application_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline, additional dataframe with data about previous applications
+    and returns input dataframe with additional column RATE_DOWN_PAYMENT.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    previous_application_df - additional dataframe with data about previous applications in Home Credit. 
+    """
+    
+    result = input_df.copy()
+    
+    down_payment_rate = (previous_application_df[["SK_ID_CURR", "RATE_DOWN_PAYMENT"]]
+                         .groupby("SK_ID_CURR")["RATE_DOWN_PAYMENT"]
+                         .mean()
+                         .reset_index())
+    
+    result = pd.merge(result, down_payment_rate, on="SK_ID_CURR", how="left").fillna(0)
+    
+    return result
+
+
+def installments_version(input_df: pd.DataFrame, installments_payments_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline, additional dataframe with data about repayment history for 
+    the previously disbursed credits in Home Credit and returns input dataframe with additional column NUM_INSTALMENT_VERSION.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    installments_payments_df - additional dataframe with data about repayment history for the previously disbursed credits in Home Credit. 
+    """
+    
+    result = input_df.copy()
+    
+    installments_payments_df["INSTALMENT_VERSION_CHANGE"] = np.where((installments_payments_df["NUM_INSTALMENT_VERSION"] > 1), 1, 0)
+    avg_installment_version = (installments_payments_df[installments_payments_df["INSTALMENT_VERSION_CHANGE"] == 1]
+                               .groupby("SK_ID_CURR")["NUM_INSTALMENT_VERSION"]
+                               .mean()
+                               .reset_index())
+    
+    result = pd.merge(result, avg_installment_version, on="SK_ID_CURR", how="left").fillna(0)
+    
+    return result
+
+
+def debt_income_ratio(input_df: pd.DataFrame, bureau_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline, additional dataframe with data provided by other financial institutions
+    and returns input dataframe with additional column with ratio of client's total monthly debt and monthly income.
+    
+    Keyword arguments:
+    input_df -- primary dataframe within sklearn pipeline.
+    bureau_df - additional dataframe with information about previous credits provided by other financial institutions. 
+    """
+    
+    result = input_df.copy()
+    
+    bureau_debt = (bureau_df[(bureau_df["AMT_CREDIT_SUM_DEBT"] > 0)
+                             & (bureau_df["CREDIT_ACTIVE"] == "Active")
+                             & (bureau_df["DAYS_CREDIT_ENDDATE"] > 0)]
+                   .groupby("SK_ID_CURR")[["AMT_CREDIT_SUM_DEBT", "DAYS_CREDIT_ENDDATE"]]
+                   .sum()
+                   .reset_index())
+    bureau_debt["CREDIT_DEBT_ANNUITY"] = bureau_debt["AMT_CREDIT_SUM_DEBT"] / (bureau_debt["DAYS_CREDIT_ENDDATE"] / 30)
+    
+    result = pd.merge(result, bureau_debt, on="SK_ID_CURR", how="left").fillna(0)
+    
+    result["TOTAL_ANNUITY"] = result["CREDIT_DEBT_ANNUITY"] + result["AMT_ANNUITY"]
+    result["INCOME_DEBT_RATIO"] = result["TOTAL_ANNUITY"] / result["AMT_INCOME_TOTAL"] * 100
+
+    result = result.drop(columns=["AMT_CREDIT_SUM_DEBT", "DAYS_CREDIT_ENDDATE", "CREDIT_DEBT_ANNUITY", "TOTAL_ANNUITY"])
     
     return result
