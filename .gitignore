@@ -14,3 +14,8 @@ submissions/forest_predictions.csv
 submissions/ada_predictions.csv
 __pycache__/functions.cpython-39.pyc
 __pycache__/custom_transformers.cpython-39.pyc
+__pycache__/custom_transformers.cpython-38.pyc
+notebook.ipynb
+__pycache__/functions.cpython-38.pyc
+submissions/base_predictions.csv
+submissions/log_predictions.csv
