@@ -218,7 +218,7 @@ def prev_annuity_income_ratio(input_df: pd.DataFrame, previous_application_df: p
 
 def enquiries(input_df: pd.DataFrame, enquiries_list: list) -> pd.DataFrame:
     """Takes in pandas dataframe from pipeline and list of columns' name and returns 
-    input dataframe with additional column PREV_ANNUITY_VERSUS_INCOME - number of all 
+    input dataframe with additional column AMT_REQ_CREDIT_BUREAU - number of all 
     enquiries to Credit Bureau about the client before application.
     
     Keyword arguments:
