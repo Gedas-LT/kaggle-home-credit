@@ -330,3 +330,31 @@ def debt_income_ratio(input_df: pd.DataFrame, bureau_df: pd.DataFrame) -> pd.Dat
     result = result.drop(columns=["AMT_CREDIT_SUM_DEBT", "DAYS_CREDIT_ENDDATE", "CREDIT_DEBT_ANNUITY", "TOTAL_ANNUITY"])
     
     return result
+
+
+def client_social_circle(input_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline, sums up OBS_30_CNT_SOCIAL_CIRCLE with OBS_60_CNT_SOCIAL_CIRCLE,
+    DEF_30_CNT_SOCIAL_CIRCLE with DEF_60_CNT_SOCIAL_CIRCLE and returns input dataframe with two new columns
+    OBS_CNT_SOCIAL_CIRCLE and DEF_CNT_SOCIAL_CIRCLE. Also drops aforementioned primary columns.
+    """
+    
+    result = input_df.copy()
+    
+    result["OBS_CNT_SOCIAL_CIRCLE"] = result["OBS_30_CNT_SOCIAL_CIRCLE"] * result["OBS_60_CNT_SOCIAL_CIRCLE"]
+    result["DEF_CNT_SOCIAL_CIRCLE"] = result["DEF_30_CNT_SOCIAL_CIRCLE"] * result["DEF_60_CNT_SOCIAL_CIRCLE"]
+    
+    result = result.drop(columns=["OBS_30_CNT_SOCIAL_CIRCLE", "OBS_60_CNT_SOCIAL_CIRCLE",
+                                  "DEF_30_CNT_SOCIAL_CIRCLE", "DEF_60_CNT_SOCIAL_CIRCLE"])
+    
+    return result
+
+
+def drop_id(input_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline and drops SK_ID_CURR column which is irrelevant for final modelling.
+    """
+    
+    result = input_df.copy()
+    
+    result = result.drop(columns=["SK_ID_CURR"])
+    
+    return result 
