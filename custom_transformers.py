@@ -357,4 +357,32 @@ def drop_id(input_df: pd.DataFrame) -> pd.DataFrame:
     
     result = result.drop(columns=["SK_ID_CURR"])
     
-    return result 
+    return result
+
+
+def region_rating(input_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline, multiplies REGION_RATING_CLIENT and REGION_RATING_CLIENT_W_CITY values
+    and returns input dataframe with new column REGION_RATING. Also drops aforementioned primary columns.
+    """
+    
+    result = input_df.copy()
+    
+    result["REGION_RATING"] = result["REGION_RATING_CLIENT"] * result["REGION_RATING_CLIENT_W_CITY"]
+    
+    result = result.drop(columns=["REGION_RATING_CLIENT", "REGION_RATING_CLIENT_W_CITY"])
+    
+    return result
+
+
+def external_source(input_df: pd.DataFrame) -> pd.DataFrame:
+    """Takes in pandas dataframe from pipeline, sums up EXT_SOURCE_2 and EXT_SOURCE_3 values
+    and returns input dataframe with new column EXT_SOURCE. Also drops aforementioned primary columns
+    """
+    
+    result = input_df.copy()
+    
+    result["EXT_SOURCE"] = result["EXT_SOURCE_2"] + result["EXT_SOURCE_3"]
+    
+    result = result.drop(columns=["EXT_SOURCE_2", "EXT_SOURCE_3"])
+    
+    return result
