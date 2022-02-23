@@ -386,15 +386,3 @@ def external_source(input_df: pd.DataFrame) -> pd.DataFrame:
     result = result.drop(columns=["EXT_SOURCE_2", "EXT_SOURCE_3"])
     
     return result
-
-
-def multicollinearity_drop(input_df: pd.DataFrame, features: list) -> pd.DataFrame:
-    """Takes in pandas dataframe from pipeline, sums up EXT_SOURCE_2 and EXT_SOURCE_3 values
-    and returns input dataframe with new column EXT_SOURCE. Also drops aforementioned primary columns
-    """
-    
-    result = input_df.copy()
-    
-    result = result.drop(columns=features)
-    
-    return result
