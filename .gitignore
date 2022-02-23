@@ -19,3 +19,7 @@ notebook.ipynb
 __pycache__/functions.cpython-38.pyc
 submissions/base_predictions.csv
 submissions/log_predictions.csv
+data/private_leaderboard.csv
+submissions/base_predictions.csv
+submissions/log_predictions.csv
+submissions/lgbm_predictions.csv
