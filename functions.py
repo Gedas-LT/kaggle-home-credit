@@ -5,9 +5,8 @@ import numpy as np
 import pandas as pd
 
 def distinct_values(dataframe: pd.DataFrame, col_name: str, coef: float) -> pd.DataFrame:
-    """Takes in dataframe with missing values and randomly fill that NaN values with most frequent values
-    The number of most frequent values is specified by coef argument which states what fraction off samples
-    should contain that most frequent values.
+    """Takes in dataframe with missing values and randomly fill NaNs of specified column with most frequent values.
+    The most frequent values and total number of them are calculated by coef argument which states the fraction of samples.
     
     Keyword arguments:
     dataframe -- dataframe with missing values.
