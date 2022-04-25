@@ -9,3 +9,11 @@ While Home Credit is currently using various statistical and machine learning me
 
 ### Details
 Data cleaning, EDA & Feature engineering, modelling and all descriptions are in the notebook.ipynb file. Functions for distinct operations and functions for custom scikit-learn transformer are in the separate files. Also in separate file called code_snippets.py is code that I have used to do some calculations but is not necessary afterwards.
+
+Used classifiers:
+- Logistic regression
+- Linear classifier with SGD training
+- Random forest
+- XGBoost
+- AdaBoost
+- LightGBM
